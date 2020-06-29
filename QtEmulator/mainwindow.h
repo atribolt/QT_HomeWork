@@ -33,8 +33,8 @@ private:
 
     QTimer _timer;
 
-    Emulator::SendData    _server;
-    Emulator::SimpleWave *_simpleWave;
+    Emulator::SimpleWave            *_simpleWave;
+    Emulator::SendData::SendDataPtr  _server;
 
     float startX { 0.f };
     float deltaX { 0.5 };

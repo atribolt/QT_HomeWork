@@ -23,7 +23,7 @@ void MainWindow::HopDataRead(float x, float val) {
     update();
 }
 
-void MainWindow::paintEvent(QPaintEvent *ev) {
+void MainWindow::paintEvent(QPaintEvent*) {
     _signalView.resize( geometry().size() );
     _signalView.update();
 }

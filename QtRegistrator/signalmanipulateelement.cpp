@@ -80,24 +80,25 @@ void Registartor::Render
     pen.setWidthF(_propRender.thickness);
     pen.setCapStyle(Qt::PenCapStyle::RoundCap);
 
-
     paint->setPen( pen );
 
-    auto increment = [](int n, int x, int max){ return (n + x) % max; };
-    auto decrement = [](int n, int x, int max){ return ((n - x) + max) % max; };
+    { // лямбды для чистоты глобальной области видимости - auto обязательно
+        auto increment = [](int n, int x, int max){ return (n + x) % max; };
+        auto decrement = [](int n, int x, int max){ return ((n - x) + max) % max; };
 
-    QPointF back = buffer[decrement(_begin, 1, buffer.size())];
-    back.setY(0);
+        QPointF back = buffer[decrement(_begin, 1, buffer.size())];
+        back.setY(0);
 
-    for (int i = 0; (i) < buffer.size() -1; ++i) {
-        int prew_idx = decrement(i + _begin, 1, buffer.size());
-        int curr_idx = increment(i + _begin, 0, buffer.size());
+        for (int i = 0; (i) < buffer.size() -1; ++i) {
+            int prew_idx = decrement(i + _begin, 1, buffer.size());
+            int curr_idx = increment(i + _begin, 0, buffer.size());
 
-        if ( buffer[prew_idx].x() < buffer[curr_idx].x() ) {
-            QLineF line( buffer[prew_idx], buffer[curr_idx] );
+            if ( buffer[prew_idx].x() < buffer[curr_idx].x() ) {
+                QLineF line( buffer[prew_idx], buffer[curr_idx] );
 
-            line.translate( _propRender.offset  - back);
-            paint->drawLine(line);
+                line.translate( _propRender.offset  - back);
+                paint->drawLine(line);
+            }
         }
     }
 }
@@ -132,7 +133,7 @@ void Registartor::Render
              ::SignalManipulateElement
              ::ChangeColor()
 {
-    auto color = QColorDialog::getColor();
+    QColor color = QColorDialog::getColor();
     SetColor(color);
 }
 
@@ -141,13 +142,11 @@ void Registartor::Render
              ::SignalManipulateElement
              ::InitMenu()
 {
-    auto action = _toolMenu.addAction("Изменить толщину");
+    QAction* action = _toolMenu.addAction("Изменить толщину");
     connect(action, &QAction::triggered, this, &SignalManipulateElement::ShowSpinBox);
 
     action = _toolMenu.addAction("Выбрать цвет");
     connect(action, &QAction::triggered, this, &SignalManipulateElement::ChangeColor);
-
-
 }
 
 //###################################################################################
@@ -157,7 +156,6 @@ void Registartor::Render
              ::SignalManipulateElement
              ::paintEvent(QPaintEvent*)
 {
-
     QPainter paint(this);
 
     paint.translate( geometry().width() / 2, geometry().height() / 2 );

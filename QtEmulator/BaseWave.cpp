@@ -4,7 +4,8 @@
 #include <QRandomGenerator>
 #include <chrono>
 
-auto SinusWave = [] (float x, float b, float a, float c, float d) {
+
+float SinusWave (float x, float b, float a, float c, float d) {
     float res = 0.f;
     res = b + a * sinf( c*x + d );
     return res;
@@ -13,7 +14,7 @@ Emulator::Sinusoida::Sinusoida()
     : SimpleWave(SinusWave) {}
 
 
-auto CosinusWave = [] (float x, float b, float a, float c, float d) {
+float CosinusWave (float x, float b, float a, float c, float d) {
     float res = 0.f;
     res = b + a * cosf(c*x + d);
     return res;
@@ -22,7 +23,7 @@ Emulator::Cosinusoida::Cosinusoida()
     : SimpleWave(CosinusWave) {}
 
 
-auto RandWave = [] (float x, float b, float a, float c, float d) {
+float RandWave (float x, float b, float a, float c, float d) {
     using std::chrono::duration_cast;
     using std::chrono::milliseconds;
     using std::chrono::system_clock;

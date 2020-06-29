@@ -4,14 +4,15 @@
 
 Emulator::SimpleWave::SimpleWave(
           wave_fun func
-        , float A
-        , float B
-        , float C
-        , float D )
-    : Signal( func )
+        , float amplitude
+        , float biasOY
+        , float frequence
+        , float biasOX    )
 {
-    this->A = A;
-    this->B = B;
-    this->C = C;
-    this->D = D;
+    wave = func;
+
+    this->biasOY    = biasOY   ;
+    this->biasOX    = biasOX   ;
+    this->amplitude = amplitude;
+    this->frequence = frequence;
 }

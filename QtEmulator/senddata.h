@@ -1,51 +1,39 @@
 #ifndef SENDDATA_H
 #define SENDDATA_H
 
-#include <QTcpServer>
-#include <QDataStream>
-#include <QTcpSocket>
+#include <memory>
+
 #include <QVector>
+#include <QTcpServer>
+
+#include "SocketSender.h"
 
 namespace Emulator {
 
-// класс для абстракции работы отправки данных
+inline static const QHostAddress SERVER_ADDR { QHostAddress::LocalHost };
+inline static const int          SERVER_PORT { 8888 };
+
 class SendData final : public QObject {
     Q_OBJECT
 
-    using Array_T  = QVector<QTcpSocket*>;
-    using Server_T = QTcpServer;
-
 public:
-    SendData(QHostAddress addr, int port);
-    ~SendData() { if ( serv ) delete serv; }
 
-    //template<class ...T>
-    //    void Send(T const& ...send_data) {
-    //        QByteArray data;
-    //        QDataStream stream(&data, QIODevice::WriteOnly);
-    //
-    //        ( (stream << send_data), ... ); // запись данных в буффер
-    //
-    //        for (auto& sock : socks) {
-    //            try {
-    //                sock->write(data);
-    //            } catch( ... ) {
-    //                emit ErrorSendToClient(sock);
-    //            }
-    //        }
-    //    }
+    static std::shared_ptr<SendData> Create();
 
     void Send(float x, float val);
 
+    ~SendData() { if ( serv ) delete serv; }
 signals:
     void ErrorCreateServer(QString msg);
-    void ErrorSendToClient(QTcpSocket* sock);
 
 private:
-    void AddNewConnection();
+    SendData(QHostAddress addr, int port);
 
-    Array_T      socks; // список подключенных клиентов
-    Server_T   * serv;
+    void AddNewConnection();
+    void RemoveClient(qintptr);
+
+    QVector<Client>  socks; // подключенные клиентов
+    QTcpServer     * serv;
 };
 
 } // end namespace Emulator

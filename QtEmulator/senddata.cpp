@@ -1,36 +1,89 @@
 #include "senddata.h"
 
 #include <QString>
+#include <QDataStream>
+
+#include <memory>
+
+// Синглтон
+static std::shared_ptr<Emulator::SendData> Singleton { nullptr };
 
 Emulator::SendData::SendData(QHostAddress addr, int port) {
-    serv = new Server_T();
+    serv = new QTcpServer();
     if (!serv) emit ErrorCreateServer("Error allocate QTcpServer");
 
     // для добавления новых клиентов в список подключенных
-    serv->connect(serv, &Server_T::newConnection, this, &SendData::AddNewConnection);
+    connect(serv, &QTcpServer::newConnection, this, &SendData::AddNewConnection);
 
     serv->listen(addr, port);
 }
 
+std::shared_ptr<Emulator::SendData> Emulator::SendData::Create() {
+    using Emulator::SendData;
+
+    if ( !Singleton ) {
+        Singleton.reset(new SendData(SERVER_ADDR, SERVER_PORT));
+    }
+
+    return Singleton;
+}
+
 void Emulator::SendData::AddNewConnection() {
-    auto sock = serv->nextPendingConnection();
+    QTcpSocket* sock = serv->nextPendingConnection();
 
     if ( sock ) {
-        socks.push_back(sock);
+        Client client;
+
+        SocketWork *work   = new SocketWork(sock);
+        QThread    *thread = new QThread();
+
+        client.Init( thread
+                   , work
+                   , [] (QThread*& th, SocketWork*& sw) {
+                        if (th) {
+                            th->quit();
+                            th->wait();
+                            th->exit();
+                            delete th;
+                        }
+                        th = nullptr;
+                        sw = nullptr;
+                   }
+        );
+
+        connect(thread, &QThread::finished,        work, &QObject::deleteLater);
+        connect(work,   &SocketWork::ErrorSending, this, &SendData::RemoveClient);
+
+        client.swork  = work;
+        client.thread = thread;
+
+        socks.push_back(client);
+        socks.back().thread->start();
+    }
+}
+
+void Emulator::SendData::RemoveClient(qintptr sock_id) {
+    using iterator = QVector<Client>::iterator;
+
+    if ( sock_id > 0 ) {
+        iterator iter = std::find_if(
+                    socks.data(), socks.data() + socks.size(),
+                    [sock_id](Client& c) {
+                        return c.swork->sock->socketDescriptor() == sock_id;
+                    }
+        );
+
+        if ( iter != (socks.data() + socks.size()) ) {
+             iter->Free();
+
+             std::swap(*iter, socks.back());
+             socks.resize( socks.size() - 1 );
+        }
     }
 }
 
 void Emulator::SendData::Send(float x, float val) {
-       QByteArray data;
-       QDataStream stream(&data, QIODevice::WriteOnly);
-
-       stream << x << val;
-
-       for (auto& sock : socks) {
-           try {
-               sock->write(data);
-           } catch( ... ) {
-               emit ErrorSendToClient(sock);
-           }
-       }
+    for(int i = 0; i < socks.size(); ++i) {
+        socks[i].swork->Send(x, val);
+    }
 }

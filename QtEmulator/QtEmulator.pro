@@ -21,6 +21,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     BaseWave.cpp \
+    SocketSender.cpp \
     main.cpp \
     mainwindow.cpp \
     senddata.cpp \
@@ -28,6 +29,7 @@ SOURCES += \
 
 HEADERS += \
     BaseWave.hpp \
+    SocketSender.h \
     mainwindow.h \
     senddata.h \
     signal.h

@@ -7,11 +7,10 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , _server(QHostAddress::LocalHost, 8888)
 {
     ui->setupUi(this);
+    _server     = Emulator::SendData::Create(); //(QHostAddress::LocalHost, 8888);
     _simpleWave = new Emulator::Cosinusoida();
-
 
     connect(&_timer, &QTimer::timeout, this, &MainWindow::GeneratePoint);
     connect(ui->sb_Interval_MLS, QOverload<int>::of(&QSpinBox::valueChanged), &_timer, QOverload<int>::of(&QTimer::setInterval));
@@ -47,7 +46,7 @@ void MainWindow::GeneratePoint()  {
     ui->lbl_X    ->setText(QString("Значение Х: %1").arg(startX));
     ui->lbl_Value->setText(QString("Значение Y: %1").arg(val));
 
-    _server.Send(startX, val);
+    _server->Send(startX, val);
 }
 
 void MainWindow::SetDeltaX(float val) noexcept { deltaX = val; }

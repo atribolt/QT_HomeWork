@@ -30,8 +30,8 @@ struct Client {
 
     // устанавливает указатели и перемещает swork в поток thread
     // !!! перед установкой удаляет данные по указателям
-    // функтор - ваш сборщик мусора для этих двух полей
-    // если функтор == nullptr, данные не удаляются
+    // free_mem - ваш сборщик мусора для этих двух полей
+    // если free_mem == nullptr, данные не удаляются
     void Init( QThread*    _thread
              , SocketWork* _swork
              , void (*free_mem)(QThread*&, SocketWork*&) = nullptr);

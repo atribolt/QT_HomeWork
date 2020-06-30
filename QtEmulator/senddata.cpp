@@ -5,9 +5,6 @@
 
 #include <memory>
 
-// Синглтон
-static std::shared_ptr<Emulator::SendData> Singleton { nullptr };
-
 Emulator::SendData::SendData(QHostAddress addr, int port) {
     serv = new QTcpServer();
     if (!serv) emit ErrorCreateServer("Error allocate QTcpServer");
@@ -21,9 +18,9 @@ Emulator::SendData::SendData(QHostAddress addr, int port) {
 std::shared_ptr<Emulator::SendData> Emulator::SendData::Create() {
     using Emulator::SendData;
 
-    if ( !Singleton ) {
-        Singleton.reset(new SendData(SERVER_ADDR, SERVER_PORT));
-    }
+    // C++11 гарантирует единственное инстанцирование локальной статической переменной
+    // потокобезопасное инстанцирование
+    static std::shared_ptr<SendData> Singleton { new SendData(SERVER_ADDR, SERVER_PORT) };
 
     return Singleton;
 }

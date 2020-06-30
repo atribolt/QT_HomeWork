@@ -1,8 +1,7 @@
 #include "SocketSender.h"
 
-#include <QDataStream>
 #include <QByteArray>
-#include <QApplication>
+#include <QDataStream>
 
 //############# class SocketWork #################
 
@@ -39,7 +38,7 @@ void Emulator::SocketWork::Send(float x, float y) {
 
 void Emulator::Client::Init( QThread    * _thread
                            , SocketWork * _swork
-                           , std::function<void (QThread *&, SocketWork *&)> free_memory)
+                           , void (*free_memory)(QThread*&, SocketWork*&))
 {
     Free();
 

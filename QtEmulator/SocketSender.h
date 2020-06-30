@@ -5,8 +5,6 @@
 #include <QThread>
 #include <QTcpSocket>
 
-#include <functional>
-
 namespace Emulator {
 
 class SocketWork : public QObject
@@ -25,7 +23,6 @@ signals:
 };
 
 
-
 // Объект владеет, принимаемыми извне указателями
 struct Client {
     QThread    * thread { nullptr };
@@ -34,13 +31,14 @@ struct Client {
     // устанавливает указатели и перемещает swork в поток thread
     // !!! перед установкой удаляет данные по указателям
     // функтор - ваш сборщик мусора для этих двух полей
+    // если функтор == nullptr, данные не удаляются
     void Init( QThread*    _thread
              , SocketWork* _swork
-             , std::function<void(QThread*&, SocketWork*&)> free_memory);
+             , void (*free_mem)(QThread*&, SocketWork*&) = nullptr);
 
     void Free();
 private:
-    std::function<void(QThread*&, SocketWork*&)> _Free;
+    void (*_Free)(QThread*&, SocketWork*&) { nullptr };
 };
 
 }

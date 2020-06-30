@@ -64,6 +64,8 @@ void Emulator::SendData::AddNewConnection() {
 
 void Emulator::SendData::RemoveClient(qintptr sock_id) {
     using iterator = QVector<Client>::iterator;
+// or
+// typedef QVector<Client>::iterator iterator;
 
     if ( sock_id > 0 ) {
         iterator iter = std::find_if(

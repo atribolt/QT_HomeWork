@@ -17,7 +17,6 @@ class SendData final : public QObject {
     Q_OBJECT
 
 public:
-
     static std::shared_ptr<SendData> Create();
 
     void Send(float x, float val);

@@ -5,25 +5,40 @@
 #include <chrono>
 
 
-float SinusWave (float x, float b, float a, float c, float d) {
+static float SinusWave ( float x
+                       , float biasOY
+                       , float amplitud
+                       , float freq
+                       , float biasOX)
+{
     float res = 0.f;
-    res = b + a * sinf( c*x + d );
+    res = biasOY + amplitud * sinf( freq*x + biasOX );
     return res;
 };
 Emulator::Sinusoida::Sinusoida()
     : SimpleWave(SinusWave) {}
 
 
-float CosinusWave (float x, float b, float a, float c, float d) {
+static float CosinusWave ( float x
+                         , float biasOY
+                         , float amplitud
+                         , float freq
+                         , float biasOX)
+{
     float res = 0.f;
-    res = b + a * cosf(c*x + d);
+    res = biasOY + amplitud * cosf(freq*x + biasOX);
     return res;
 };
 Emulator::Cosinusoida::Cosinusoida()
     : SimpleWave(CosinusWave) {}
 
 
-float RandWave (float x, float b, float a, float c, float d) {
+static float RandWave ( float x
+                      , float biasOY
+                      , float amplitud
+                      , float freq
+                      , float biasOX)
+{
     using std::chrono::duration_cast;
     using std::chrono::milliseconds;
     using std::chrono::system_clock;
@@ -31,11 +46,11 @@ float RandWave (float x, float b, float a, float c, float d) {
     float res = 0.f;
     QRandomGenerator rg( duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count() );
 
-    b = rg.bounded( 80, 150 ) / 100;
-    a = rg.bounded( 80, 150 ) / 100;
-    c = rg.bounded( 80, 150 ) / 100;
+    biasOY   = rg.bounded( 80, 150 ) / 100;
+    amplitud = rg.bounded( 80, 150 ) / 100;
+    freq     = rg.bounded( 80, 150 ) / 100;
 
-    res = b + a * cosf(c*x + d);
+    res = biasOY + amplitud * cosf(freq*x + biasOX);
 
     return res;
 };

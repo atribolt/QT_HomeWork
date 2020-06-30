@@ -1,33 +1,13 @@
 #ifndef SIGNAL_H
 #define SIGNAL_H
 
-#include <functional>
+//#include <functional>
 
 namespace Emulator {
 
-//template<class _TOut, class ...Args>
-//    class Signal {
-//    public:
-//        using type_out = _TOut;
-//        using wave_fun = std::function<type_out(Args...)>;
-//
-//    public:
-//        Signal(wave_fun signal_function) {
-//            wave = signal_function;
-//        }
-//
-//        type_out operator()(Args const& ...args) {
-//            return wave(args...);
-//        }
-//
-//    public:
-//        wave_fun wave;
-//    };
-
-//
-
 class SimpleWave {
-     using wave_fun = std::function<float(float, float, float, float, float)>;
+     using wave_fun = float(*)(float, float, float, float, float);
+    //              = std::function<float(float, float, float, float, float)>;
 
 public:
     SimpleWave( wave_fun wave

@@ -1,7 +1,5 @@
 #include "signal.h"
 
-#include <QtMath>
-
 Emulator::SimpleWave::SimpleWave(
           wave_fun func
         , float amplitude

@@ -29,60 +29,43 @@ void Emulator::SendData::AddNewConnection() {
     QTcpSocket* sock = serv->nextPendingConnection();
 
     if ( sock ) {
-        Client client;
-
-        SocketWork *work   = new SocketWork(sock);
-        QThread    *thread = new QThread();
-
-        client.Init( thread
-                   , work
-                   , [] (QThread*& th, SocketWork*& sw) {
-                        if (th) {
-                            th->quit();
-                            th->wait();
-                            th->exit();
-                            delete th;
-                        }
-                        th = nullptr;
-                        sw = nullptr;
-                   }
-        );
-
-        connect(thread, &QThread::finished,        work, &QObject::deleteLater);
-        connect(work,   &SocketWork::ErrorSending, this, &SendData::RemoveClient);
-
-        client.swork  = work;
-        client.thread = thread;
-
-        socks.push_back(client);
-        socks.back().thread->start();
+        socks.push_back(Client(sock));
+        connect(socks.back().SWork(), &SocketWork::ErrorSending, this, &SendData::RemoveClient);
     }
 }
 
 void Emulator::SendData::RemoveClient(qintptr sock_id) {
-    using iterator = QVector<Client>::iterator;
-// or
-// typedef QVector<Client>::iterator iterator;
+    //using iterator = QVector<Client>::iterator;
+    auto fast_remove = [](auto& vec, Client* a) {
+        std::swap(*a, vec.back());
+        vec.resize( vec.size() - 1 );
+    };
 
     if ( sock_id > 0 ) {
-        iterator iter = std::find_if(
-                    socks.data(), socks.data() + socks.size(),
-                    [sock_id](Client& c) {
-                        return c.swork->sock->socketDescriptor() == sock_id;
-                    }
-        );
+        auto check = [&sock_id](Client& c){
+           return c.SWork()->sock->socketDescriptor() == sock_id;
+        };
+
+        Client* iter = std::find_if(socks.data(), socks.data() + socks.size(), check);
 
         if ( iter != (socks.data() + socks.size()) ) {
-             iter->Free();
+            fast_remove(socks, iter);
+        }
+    } else {
+        // подчистка пустых сокетов с id == -1 // id == 0
+        auto check = [](Client& c) { return c.SWork()->sock->socketDescriptor() <= 0; };
 
-             std::swap(*iter, socks.back());
-             socks.resize( socks.size() - 1 );
+        Client* iter = std::find_if(socks.data(), socks.data() + socks.size(), check);
+
+        while( iter != (socks.data() + socks.size()) ) {
+            fast_remove(socks, iter);
+            iter = std::find_if(socks.data(), socks.data() + socks.size(), check);
         }
     }
 }
 
 void Emulator::SendData::Send(float x, float val) {
     for(int i = 0; i < socks.size(); ++i) {
-        socks[i].swork->Send(x, val);
+        socks[i].Send(x, val);
     }
 }

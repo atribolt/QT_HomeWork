@@ -34,23 +34,50 @@ void Emulator::SocketWork::Send(float x, float y) {
         emit ErrorSending(sock->socketDescriptor());
 }
 
-//############# struct Client #####################
+//############# class Client #####################
 
-void Emulator::Client::Init( QThread    * _thread
-                           , SocketWork * _swork
-                           , void (*free_memory)(QThread*&, SocketWork*&))
-{
-    Free();
+Emulator::Client::Client() {}
+Emulator::Client::Client(Emulator::Client&& other)      { *this = std::move(other); }
+Emulator::Client::Client(Emulator::Client const& other)
+    : Client(other.swork->sock)
+{}
 
-    thread = _thread;
-    swork  = _swork;
-    swork->moveToThread(thread);
+Emulator::Client::Client(QTcpSocket* client) {
+    swork  = new SocketWork(client);
+    thread = new QThread();
 
-    _Free = free_memory;
+    connect(thread, &QThread::finished, swork, &QObject::deleteLater);
+    connect(this,   &Client::sending,   swork, &SocketWork::Send);
+
+    thread->start();
+}
+Emulator::Client::~Client(){
+    if (thread) {
+       thread->quit();
+       thread->wait();
+       thread->exit();
+
+       delete thread;
+    }
+
+    thread = nullptr;
+    swork  = nullptr;
 }
 
-void Emulator::Client::Free()
-{
-    if(_Free) _Free(thread, swork);
+
+Emulator::Client&& Emulator::Client::operator=(Client&& other) {
+    disconnect(this,   &Client::sending, swork,       &SocketWork::Send);
+    disconnect(&other, &Client::sending, other.swork, &SocketWork::Send);
+
+    std::swap( swork,  other.swork  );
+    std::swap( thread, other.thread );
+
+    connect(this,   &Client::sending, swork,       &SocketWork::Send);
+    connect(&other, &Client::sending, other.swork, &SocketWork::Send);
+
+    return std::move(*this);
 }
 
+void Emulator::Client::Send(float x, float y) {
+    emit sending(x, y);
+}

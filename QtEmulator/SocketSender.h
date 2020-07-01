@@ -22,23 +22,26 @@ signals:
     void ErrorSending(qintptr); // ошибка отправки
 };
 
+class Client : public QObject {
+    Q_OBJECT
 
-// Объект владеет, принимаемыми извне указателями
-struct Client {
-    QThread    * thread { nullptr };
-    SocketWork * swork  { nullptr };
+public:
+    Client();
+    Client(Client&& other);
+    Client(Client const& other);
+    Client(QTcpSocket* client);
+    ~Client();
 
-    // устанавливает указатели и перемещает swork в поток thread
-    // !!! перед установкой удаляет данные по указателям
-    // free_mem - ваш сборщик мусора для этих двух полей
-    // если free_mem == nullptr, данные не удаляются
-    void Init( QThread*    _thread
-             , SocketWork* _swork
-             , void (*free_mem)(QThread*&, SocketWork*&) = nullptr);
+    Client&& operator=(Client&& other);
+    SocketWork* SWork() { return swork; }
 
-    void Free();
+    void Send(float x, float y);
+signals:
+    void sending(float x, float y);
+
 private:
-    void (*_Free)(QThread*&, SocketWork*&) { nullptr };
+    SocketWork * swork  { nullptr };
+    QThread    * thread { nullptr };
 };
 
 }

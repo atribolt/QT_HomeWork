@@ -1,5 +1,4 @@
-#ifndef SIGNALMANIPULATEELEMENT_H
-#define SIGNALMANIPULATEELEMENT_H
+#pragma once
 
 #include <QMenu>
 #include <QWidget>
@@ -25,11 +24,11 @@ public:
     void PushPoint(QPointF point);
     void ClearAllPoint();
 
-    void SetOffset       (QPointF val) noexcept;
-    void SetColor        (QColor  val) noexcept;
     void SetScale        (QPointF val) noexcept;
-    void SetThickness    (float   val) noexcept;
-    void SetMaxPointCount(int     val = 100);     // ограничение хранимых значений для отрисовки
+    void SetColor        (QColor val) noexcept;
+    void SetOffset       (QPointF val) noexcept;
+    void SetThickness    (float val) noexcept;
+    void SetMaxPointCount(int val = 500);     // ограничение хранимых значений для отрисовки
 
 private slots:
     void paintEvent       (QPaintEvent *event) override;
@@ -53,5 +52,3 @@ private:
 };
 
 }
-
-#endif // SIGNALMANIPULATEELEMENT_H

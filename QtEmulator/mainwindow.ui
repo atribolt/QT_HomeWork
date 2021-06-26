@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>375</width>
+    <width>315</width>
     <height>407</height>
    </rect>
   </property>
@@ -293,8 +293,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>375</width>
-     <height>21</height>
+     <width>315</width>
+     <height>20</height>
     </rect>
    </property>
   </widget>

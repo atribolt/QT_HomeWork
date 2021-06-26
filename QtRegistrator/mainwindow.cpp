@@ -5,20 +5,26 @@
 #include <QPainter>
 #include <QHostAddress>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QWidget(parent)
-    , rd(QHostAddress::LocalHost, 8888)
-{
-    //######## Init _signalView
-    _signalView.setParent(this);
-    _signalView.move(0, 0);
-    _signalView.SetMaxPointCount(300);
-    //#########################
+#include "Client.h"
 
-    connect(&rd, &RecieveData::NewData, this, &MainWindow::HopDataRead);
+MainWindow::MainWindow(Client* client)
+    : QWidget(nullptr)
+    , _client(client)
+{
+  //######## Init _signalView
+  _signalView.setParent(this);
+  _signalView.move(0, 0);
+  _signalView.SetMaxPointCount();
+  //#########################
+  
+  setClient(client);
 }
 
-void MainWindow::HopDataRead(float x, float val) {
+void MainWindow::setClient(Client* client) {
+  _client = client;
+}
+
+void MainWindow::hopDataRead(float x, float val) {
     _signalView.PushPoint( { x, val } );
     update();
 }

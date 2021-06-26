@@ -1,9 +1,7 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 
-#include "RecieveData.h"
 #include "signalmanipulateelement.h"
 
 QT_BEGIN_NAMESPACE
@@ -12,18 +10,17 @@ QT_END_NAMESPACE
 
 class MainWindow : public QWidget
 {
-    Q_OBJECT
-
+  Q_OBJECT
 public:
-    MainWindow(QWidget *parent = nullptr);
-
+  MainWindow(class Client* clientSocket);
+  void setClient(class Client* client);
+    
 private slots:
-    void paintEvent(QPaintEvent *event) override;
+  void paintEvent(QPaintEvent *event) override;
 
 private:
-    void HopDataRead(float x, float val);
+  void hopDataRead(float x, float val);
 
-    RecieveData rd;
-    Registartor::Render::SignalManipulateElement _signalView;
+  class Client* _client;
+  Registartor::Render::SignalManipulateElement _signalView;
 };
-#endif // MAINWINDOW_H

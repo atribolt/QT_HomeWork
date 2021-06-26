@@ -40,9 +40,7 @@ void Server::notifyAllClients(const Packet& pack) {
   }
 }
 
-void Server::removeConnection() {
-  Client* client = reinterpret_cast<Client*>(QObject::sender());
-  
+void Server::removeConnection(Client* client) {
   {
     QMutexLocker lock(&_lockClients);
     
@@ -62,7 +60,7 @@ void Server::incomingConnection(qintptr handle) {
     
     _clients.append(client);
     QObject::connect(_clients.back(), &Client::disconnected,
-                     [&](){ this->removeConnection(); });
+                     [&](Client* c){ this->removeConnection(c); });
   }
   else {
     qCritical(server) << "Client didn't connect";

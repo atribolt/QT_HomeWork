@@ -5,11 +5,12 @@
 #include "include/Client.h"
 
 namespace {
-  const QRegExp PACKET_PATTERN(R"(\x02(.*?)\x03)");
   const QLoggingCategory client("Client");
   
-  const char END_PACKET = '\x03';
-  const char START_PACKET = '\x02';
+  enum ASCII : uint8_t {
+    STX = 0x02,
+    ETX = 0x03
+  };
 }
 
 Client::Client() 
@@ -32,35 +33,22 @@ void Client::sendPacket(const Packet& pack) {
     return;
   }
   
-  if (!_connection->isOpen() || !_connection->openMode().testFlag(QIODevice::ReadWrite)) {
-    if (!_connection->open(QIODevice::ReadWrite)) {
-      qCritical(client) << "Socket wont be open for write";
-      return;
-    }
+  if (!_connection->open(QIODevice::ReadWrite)) {
+    qCritical(client) << "Socket wont be open for write";
+    return;
   }
   
   using std::chrono::operator""s;
   using std::chrono::milliseconds;
   
-  QByteArray data(1, START_PACKET);
+  QByteArray data(1, STX);
   data.append(encodeData(pack.getData()));
-  data.append(END_PACKET);
+  data.append(ETX);
   
   _connection->write(data);
   if (!_connection->waitForBytesWritten(milliseconds(30s).count())) {
-    qCritical(client) << "Packet sent timed out";
+    qCritical(client) << "Packet sent timed out. Data:" << data;
   }
-}
-
-Packet Client::popPacket() {
-  Packet result;
-  
-  if (_packets.size() > 0) {
-    result = _packets.back();
-    _packets.resize(_packets.size() - 1);
-  }
-  
-  return result;
 }
 
 Client::State Client::state() const {
@@ -78,7 +66,7 @@ void Client::closeConnection() {
   if (_connection != nullptr) {
     _connection->close();
     
-    while (_connection->state() == _connection->isOpen()) {
+    while (_connection->isOpen()) {
       QThread::msleep(500);
     }
   }
@@ -112,9 +100,13 @@ bool Client::operator==(const Client& other) const {
 
 void Client::init() {
   QObject::connect(_connection, &SocketType::readyRead,
-                   this, &Client::readIncomeData, Qt::QueuedConnection);
+                   this, &Client::readIncomeData);
   QObject::connect(_connection, &SocketType::disconnected,
-                   this, &Client::disconnected, Qt::QueuedConnection);
+                   this, &Client::disconnecting, Qt::QueuedConnection);
+}
+
+void Client::disconnecting() {
+  emit disconnected(this);
 }
 
 bool Client::openConnection(DescriptorType descriptor) {
@@ -124,20 +116,25 @@ bool Client::openConnection(DescriptorType descriptor) {
   _connection = new (std::nothrow) SocketType();
   if (_connection != nullptr) {
     init();
-    return _connection->setSocketDescriptor(descriptor, {}, SocketType::ReadWrite);
+    return _connection->setSocketDescriptor(descriptor, SocketType::ConnectedState, SocketType::ReadWrite);
   }
 
+  qCritical(client) << "Error connected to client";
   return false;
 }
 
 void Client::readIncomeData() {
   QByteArray data = _connection->readAll();
-  int index = PACKET_PATTERN.indexIn(data);
   
-  while (index != -1) {
-    QByteArray packetData = PACKET_PATTERN.cap(1).toUtf8();
+  int stx = data.indexOf(STX);
+  int etx = data.indexOf(ETX, stx);
+  
+  while (stx != -1 && etx != -1) {
+    QByteArray packetData = data.mid(stx + 1, etx - stx - 1);
+    emit newPacket(decodeData(packetData));
     
-    _packets.append(decodeData(packetData));
+    stx = data.indexOf(STX, etx);
+    etx = data.indexOf(ETX, stx);
   }
 }
 

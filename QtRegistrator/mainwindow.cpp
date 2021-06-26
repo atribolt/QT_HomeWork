@@ -6,6 +6,7 @@
 #include <QHostAddress>
 
 #include "Client.h"
+#include "CoordinatePacket.h"
 
 MainWindow::MainWindow(Client* client)
     : QWidget(nullptr)
@@ -21,15 +22,20 @@ MainWindow::MainWindow(Client* client)
 }
 
 void MainWindow::setClient(Client* client) {
+  QObject::disconnect(_client, nullptr, nullptr, nullptr);
   _client = client;
+  QObject::connect(_client, &Client::newPacket, this, &MainWindow::hopDataRead);
 }
 
-void MainWindow::hopDataRead(float x, float val) {
-    _signalView.PushPoint( { x, val } );
-    update();
+void MainWindow::hopDataRead(Packet const& pack) {
+  CoordinatePacket coordinate;
+  coordinate.setPacket(pack);
+
+  _signalView.PushPoint( { coordinate.x, coordinate.y } );
+  update();
 }
 
 void MainWindow::paintEvent(QPaintEvent*) {
-    _signalView.resize( geometry().size() );
-    _signalView.update();
+  _signalView.resize( geometry().size() );
+  _signalView.update();
 }

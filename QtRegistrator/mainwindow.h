@@ -2,6 +2,7 @@
 
 #include <QMainWindow>
 
+#include "Packet.h"
 #include "signalmanipulateelement.h"
 
 QT_BEGIN_NAMESPACE
@@ -19,7 +20,7 @@ private slots:
   void paintEvent(QPaintEvent *event) override;
 
 private:
-  void hopDataRead(float x, float val);
+  void hopDataRead(Packet const& packet);
 
   class Client* _client;
   Registartor::Render::SignalManipulateElement _signalView;

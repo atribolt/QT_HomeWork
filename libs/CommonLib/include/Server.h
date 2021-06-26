@@ -17,7 +17,7 @@ public:
   
 public slots:
   void notifyAllClients(Packet const& pack);
-  void removeConnection();
+  void removeConnection(Client*);
   
 protected:
   void incomingConnection(qintptr handle) override;

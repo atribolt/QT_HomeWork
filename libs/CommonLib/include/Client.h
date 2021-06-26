@@ -23,7 +23,6 @@ public:
   virtual ~Client();
   
   void sendPacket(Packet const& pack);
-  Packet popPacket();
   
   State state() const;
   void closeConnection();
@@ -33,15 +32,15 @@ public:
   bool operator==(Client const& other) const;
   
 signals:
-  void disconnected();
+  void disconnected(Client*);
   void newPacket(Packet const& packet);
   
 private:
   void init();
+  void disconnecting();
   void readIncomeData();
   QByteArray encodeData(QByteArray const& data) const;
   QByteArray decodeData(QByteArray const& data) const;
   
   SocketType* _connection { nullptr };
-  QVector<Packet> _packets;
 };

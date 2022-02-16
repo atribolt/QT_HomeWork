@@ -1,7 +1,7 @@
 #include <QList>
 #include <QLoggingCategory>
 
-#include "include/CoordinatePacket.h"
+#include "CommonLib/CoordinatePacket.h"
 
 const QLoggingCategory coordPacket("CoordinatePacket");
 
@@ -11,7 +11,7 @@ CoordinatePacket::CoordinatePacket(const Packet& pack) {
 
 void CoordinatePacket::setPacket(const Packet& packet) {
   QList<QByteArray> vars = packet.getData().split(' ');
-  
+
   if (vars.size() == 2) {
     x = vars[0].toDouble();
     y = vars[1].toDouble();

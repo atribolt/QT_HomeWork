@@ -1,6 +1,6 @@
 #include <QVector>
 
-#include "include/Packet.h"
+#include "CommonLib/Packet.h"
 
 Packet::Packet(QByteArray const& data) {
   setData(data);

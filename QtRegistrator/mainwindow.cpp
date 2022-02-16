@@ -5,8 +5,8 @@
 #include <QPainter>
 #include <QHostAddress>
 
-#include "Client.h"
-#include "CoordinatePacket.h"
+#include "CommonLib/Client.h"
+#include "CommonLib/CoordinatePacket.h"
 
 MainWindow::MainWindow(Client* client)
     : QWidget(nullptr)
@@ -17,7 +17,7 @@ MainWindow::MainWindow(Client* client)
   _signalView.move(0, 0);
   _signalView.SetMaxPointCount();
   //#########################
-  
+
   setClient(client);
 }
 

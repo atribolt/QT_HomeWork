@@ -2,7 +2,7 @@
 
 #include <QMainWindow>
 
-#include "Packet.h"
+#include "CommonLib/Packet.h"
 #include "signalmanipulateelement.h"
 
 QT_BEGIN_NAMESPACE
@@ -15,7 +15,7 @@ class MainWindow : public QWidget
 public:
   MainWindow(class Client* clientSocket);
   void setClient(class Client* client);
-    
+
 private slots:
   void paintEvent(QPaintEvent *event) override;
 

@@ -3,8 +3,8 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "Server.h"
-#include "CoordinatePacket.h"
+#include "CommonLib/Server.h"
+#include "CommonLib/CoordinatePacket.h"
 
 MainWindow::MainWindow(Server* server)
     : QMainWindow(nullptr)
@@ -12,13 +12,13 @@ MainWindow::MainWindow(Server* server)
 {
   ui->setupUi(this);
 
-  connect(&_timer, &QTimer::timeout, 
+  connect(&_timer, &QTimer::timeout,
           this, &MainWindow::GeneratePoint);
-  
-  connect(ui->sb_Interval_MLS, QOverload<int>::of(&QSpinBox::valueChanged), 
+
+  connect(ui->sb_Interval_MLS, QOverload<int>::of(&QSpinBox::valueChanged),
           &_timer, QOverload<int>::of(&QTimer::setInterval));
 
-  connect(ui->dsb_StepDX,    QOverload<double>::of(&QDoubleSpinBox::valueChanged), 
+  connect(ui->dsb_StepDX,    QOverload<double>::of(&QDoubleSpinBox::valueChanged),
           this, QOverload<float>::of(&MainWindow::SetDeltaX));
 
   ui->dsb_StepDX->setValue( 0.5 );
@@ -29,7 +29,7 @@ MainWindow::MainWindow(Server* server)
   ui->sb_Interval_MLS->setValue( 50  );
 
   setServer(server);
-  
+
   _timer.start();
 }
 
@@ -46,7 +46,7 @@ void MainWindow::setWaveFunction(WaveFunction const& func) {
 
 void MainWindow::GeneratePoint()  {
   if (!_waveFunc) return;
-  
+
   startX += deltaX;
   double Y = _waveFunc(startX,
                        ui->dsb_Amplitude->value(),
@@ -65,6 +65,6 @@ void MainWindow::GeneratePoint()  {
   }
 }
 
-void MainWindow::SetDeltaX(float val) noexcept { 
-  deltaX = val; 
+void MainWindow::SetDeltaX(float val) noexcept {
+  deltaX = val;
 }
